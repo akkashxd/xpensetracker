@@ -1,25 +1,15 @@
-.total_expenses{
-    color: orange;
-     display: flex;
-    align-items: center;
+.total_expenses {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0.5rem 0;
 }
 
-
-h2{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.addExpenseButton{
-    background: linear-gradient(to right ,rgb(244, 144, 144), red);
-    color: white;
-    height: 40px;
-    width: 200px;
-    font-size: medium;
-    font-weight: bold;
-    border: none;
-    border-radius: 15px;
-    padding: 5px;
-    cursor: pointer;
+.addExpenseButton {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  background-color: #00b894;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }

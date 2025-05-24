@@ -1,24 +1,30 @@
-.balance{
-    display: flex;
-    align-items: center;
-    
-    color: greenyellow;
+.walletContainer {
+  padding: 16px;
+  background-color: #f1f1f1;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-h2{
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.balance {
+  color: #2196f3;
+  font-weight: bold;
+  font-size: 1.2rem;
+  display: inline-flex;
+  align-items: center;
 }
-.addButton{
-    background: linear-gradient(to right ,greenyellow, lightgreen);
-    color: white;
-    height: 40px;
-    width: 200px;
-    font-size: medium;
-    font-weight: bold;
-    border: none;
-    border-radius: 15px;
-    padding: 5px;
-    cursor: pointer;
+
+.addButton {
+  margin-top: 10px;
+  padding: 8px 16px;
+  font-size: 1rem;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.addButton:hover {
+  background-color: #45a049;
 }

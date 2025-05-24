@@ -3,10 +3,19 @@ import { MdCurrencyRupee } from "react-icons/md";
 import styles from "./Expenses.module.css";
 
 function Expenses({ onAddExpense, totalExpenses }) {
+  const formattedExpense = typeof totalExpenses === 'number' ? totalExpenses : 0;
 
-  const formattedWxpense = typeof  totalExpenses === 'number' ? totalExpenses : 0;
-   return ( <div>
-      <h2>Expenses: <span className={styles.total_expenses}><MdCurrencyRupee/>{formattedWxpense}</span></h2>
+  return (
+    <div>
+      {/* This h2 is required by Cypress to detect "Expenses" */}
+      <h2>Expenses</h2>
+
+      {/* Show the total expense below the heading if needed */}
+      <div className={styles.total_expenses}>
+        <MdCurrencyRupee />
+        {formattedExpense}
+      </div>
+
       <button
         type="button"
         onClick={onAddExpense}
@@ -14,7 +23,8 @@ function Expenses({ onAddExpense, totalExpenses }) {
       >
         + Add Expense
       </button>
-      </div>)
+    </div>
+  );
 }
 
 export default Expenses;
