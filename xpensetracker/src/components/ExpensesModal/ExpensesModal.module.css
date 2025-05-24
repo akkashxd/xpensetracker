@@ -1,0 +1,68 @@
+.expensesModal{
+    position: absolute;
+    top: 35%;
+    left: 35%;
+    height: 250px;
+    width: 500px;
+    gap: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    border-radius: 10px;
+    background-color: #EFEFEFD9;
+    /* border: 2px solid #000000; */
+    color: #000000;
+}
+.heading{
+    font-weight: 700;
+    font-size: 30px;
+   
+}
+.titleInput, .priceInput, .categoryInput, .dateInput{
+    height: 40px;
+    width: 200px;
+    border: none;
+    border-radius: 15px;
+    padding: 5px;
+    margin: 5px;
+    box-shadow: 0px 4px 4px 0px #00000040;
+}
+
+
+
+.addExpenses{
+    background-color: orange;
+    color: white;
+    height: 40px;
+    width: 200px;
+    margin: 5px;
+    font-size: medium;
+    font-weight: bold;
+    border: none;
+    border-radius: 15px;
+    padding: 5px;
+    box-shadow: 0px 4px 4px 0px #00000040;
+    cursor: pointer;
+}
+
+.ExpensesClose{
+    background-color: #D9D9D9;
+    width: 112px;
+    height: 40px;
+    margin: 5px;
+    border-radius: 15px;
+    font-size: 16px;
+    font-weight: 400;
+    border: none;
+    box-shadow: 0px 4px 4px 0px #00000040;
+    cursor: pointer;
+}
+
+
+@media (max-width: 768px){
+    .expensesModal{
+        top: 35%;
+        left: 10%;
+    }
+}
