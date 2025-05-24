@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "./components/header/Header";
 import Balance from "./components/Wallet/WalletBallance";
 import Expenses from "./components/Expenses/Expenses";
@@ -7,44 +7,76 @@ import BallanceModal from "./components/BallanceModal/BallanceModal";
 import PieChart from "./components/PieChart/PieChart";
 import BarGraph from "./components/BarGraph/BarGraph";
 import TransactionList from "./components/TransactionsList/TransactionsList";
-import { v4 as uuidv4 } from 'uuid';
-import { useSnackbar } from 'notistack';
+import { v4 as uuidv4 } from "uuid";
+import { useSnackbar } from "notistack";
 
-import './App.css';
+import "./App.css";
 
 function App() {
   const { enqueueSnackbar } = useSnackbar();
 
-  const loadFromLocalStorage = (key, defaultValue) => {
-    const item = localStorage.getItem(key);
-    try {
-      const parsed = JSON.parse(item);
-      return parsed !== null && parsed !== undefined ? parsed : defaultValue;
-    } catch {
-      return defaultValue;
-    }
-  };
-
-  const [expenses, setExpenses] = useState(() => loadFromLocalStorage('expenses', []));
-  const [walletBalance, setWalletBalance] = useState(() => {
-    const storedBalance = localStorage.getItem("walletBalance");
-    const savedExpenses = loadFromLocalStorage("expenses", []);
-    const totalExpenses = savedExpenses.reduce((total, expense) => total + Number(expense.price), 0);
-    return storedBalance ? parseFloat(storedBalance) : 5000 - totalExpenses;
-  });
-
+  const [expenses, setExpenses] = useState([]);
   const [balanceModalOpen, setBalanceModalOpen] = useState(false);
   const [expenseModalOpen, setExpenseModalOpen] = useState(false);
   const [amountToAdd, setAmountToAdd] = useState('');
   const [expenseToEdit, setExpenseToEdit] = useState(null);
+
+  const [walletBalance, setWalletBalance] = useState(() => {
+    const storedBalance = localStorage.getItem("walletBalance");
+    const savedExpenses = localStorage.getItem("expenses");
+
+    let totalExpenses = 0;
+
+    if (savedExpenses) {
+      try {
+        const parsedExpenses = JSON.parse(savedExpenses);
+        if (Array.isArray(parsedExpenses)) {
+          totalExpenses = parsedExpenses.reduce((total, expense) => total + Number(expense.price), 0);
+        } else {
+          console.warn("Expenses in localStorage is not an array.");
+        }
+      } catch (error) {
+        console.error("Error parsing saved expenses:", error);
+      }
+    }
+
+    return storedBalance ? parseFloat(storedBalance) : 5000 - totalExpenses;
+  });
 
   useEffect(() => {
     localStorage.setItem("walletBalance", walletBalance);
   }, [walletBalance]);
 
   useEffect(() => {
+    const savedExpenses = localStorage.getItem("expenses");
+    if (savedExpenses) {
+      try {
+        const parsedExpenses = JSON.parse(savedExpenses);
+        if (Array.isArray(parsedExpenses)) {
+          setExpenses(parsedExpenses);
+        } else {
+          console.warn("Saved expenses is not an array, initializing empty array");
+          setExpenses([]);
+        }
+      } catch (error) {
+        console.error("Error parsing saved expenses:", error);
+        setExpenses([]);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
     localStorage.setItem("expenses", JSON.stringify(expenses));
   }, [expenses]);
+
+  useEffect(() => {
+    window.onbeforeunload = () => {
+      localStorage.removeItem("walletBalance");
+    };
+    return () => {
+      window.onbeforeunload = null;
+    };
+  }, []);
 
   const totalAmount = Array.isArray(expenses)
     ? expenses.reduce((total, expense) => total + Number(expense.price), 0)
@@ -52,11 +84,8 @@ function App() {
 
   const handleAddBalance = (amount) => {
     const numericAmount = Number(amount);
-    if (!isNaN(numericAmount) && numericAmount > 0) {
-      setWalletBalance(prev => prev + numericAmount);
-      enqueueSnackbar("Balance added successfully!", { variant: "success" });
-    } else {
-      enqueueSnackbar("Enter a valid amount!", { variant: "error" });
+    if (!isNaN(numericAmount)) {
+      setWalletBalance((prev) => Number(prev) + numericAmount);
     }
     setAmountToAdd('');
     setBalanceModalOpen(false);
@@ -69,30 +98,19 @@ function App() {
       return;
     }
 
-    setExpenses(prev => [...prev, { ...expense, id: uuidv4() }]);
-    setWalletBalance(prev => prev - numericPrice);
-    enqueueSnackbar("Expense added!", { variant: "success" });
+    setExpenses([...expenses, { ...expense, id: uuidv4() }]);
+    setWalletBalance((prevBalance) => prevBalance - numericPrice);
     setExpenseModalOpen(false);
   };
 
   const handleEditExpense = (updatedExpense) => {
-    const prevExpense = expenses.find(e => e.id === updatedExpense.id);
-    const priceDifference = Number(updatedExpense.price) - Number(prevExpense.price);
-
-    if (walletBalance < priceDifference) {
-      enqueueSnackbar("Insufficient balance to update!", { variant: "warning" });
-      return;
-    }
-
-    setExpenses(prevExpenses =>
-      prevExpenses.map(expense =>
+    setExpenses((prevExpenses) =>
+      prevExpenses.map((expense) =>
         expense.id === updatedExpense.id ? updatedExpense : expense
       )
     );
-    setWalletBalance(prev => prev - priceDifference);
     setExpenseToEdit(null);
     setExpenseModalOpen(false);
-    enqueueSnackbar("Expense updated!", { variant: "success" });
   };
 
   const handleEditClick = (expense) => {
@@ -106,18 +124,19 @@ function App() {
   };
 
   const handleDeleteExpense = (expenseId) => {
-    const deletedExpense = expenses.find(expense => expense.id === expenseId);
-    if (deletedExpense) {
-      setWalletBalance(prev => prev + Number(deletedExpense.price));
-    }
-    setExpenses(prev => prev.filter(expense => expense.id !== expenseId));
-    enqueueSnackbar("Expense deleted!", { variant: "info" });
+    setExpenses((prevExpenses) => {
+      const updatedExpenses = prevExpenses.filter((expense) => expense.id !== expenseId);
+      const deletedExpense = prevExpenses.find((expense) => expense.id === expenseId);
+      const updatedBalance = walletBalance + Number(deletedExpense?.price || 0);
+      setWalletBalance(updatedBalance);
+      return updatedExpenses;
+    });
   };
 
   return (
     <div className="App">
       <Header />
-      <div className='App-top'>
+      <div className="App-top">
         <div className="Wallet_Balance">
           <Balance
             balance={walletBalance}
